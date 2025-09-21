@@ -28,6 +28,11 @@ ENV/
 # Database
 *.db
 *.sqlite3
+app.db
+
+# Development utilities
+check_db.py
+view_db.py
 
 # IDE
 .vscode/
@@ -45,3 +50,8 @@ Thumbs.db
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Test files
+test.py
+testing.py
+*_test.py
