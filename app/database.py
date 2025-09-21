@@ -9,21 +9,16 @@ from sqlalchemy.orm import sessionmaker
 # Load environment variables from .env file
 load_dotenv()
 
-# For local development, force SQLite usage by not loading Postgres env vars
-# Comment out the lines below if you want to use PostgreSQL
-# DB_USER = os.getenv("DB_USER")
-# DB_PASSWORD_RAW = os.getenv("DB_PASSWORD")
-# DB_PASSWORD = urllib.parse.quote_plus(DB_PASSWORD_RAW) if DB_PASSWORD_RAW else None
-# DB_HOST = os.getenv("DB_HOST")
-# DB_PORT = os.getenv("DB_PORT")
-# DB_NAME = os.getenv("DB_NAME")
+# Load PostgreSQL environment variables
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD_RAW = os.getenv("DB_PASSWORD")
+DB_PASSWORD = urllib.parse.quote_plus(DB_PASSWORD_RAW) if DB_PASSWORD_RAW else None
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT")
+DB_NAME = os.getenv("DB_NAME")
 
-# Force None values to use SQLite fallback
-DB_USER = None
-DB_PASSWORD = None
-DB_HOST = None
-DB_PORT = None
-DB_NAME = None
+# For Vercel, also check for DATABASE_URL
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Debug print to see what environment variables are loaded
 print(f"DB_USER={DB_USER}")
@@ -32,15 +27,17 @@ print(f"DB_HOST={DB_HOST}")
 print(f"DB_PORT={DB_PORT}")
 print(f"DB_NAME={DB_NAME}")
 
-# Determine whether Postgres configuration is complete
-is_postgres_configured = all([DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME])
-print(f"Postgres configured: {is_postgres_configured}")
-
-if is_postgres_configured:
+# Determine database URL
+if DATABASE_URL:
+    # Vercel provides DATABASE_URL directly
+    SQLALCHEMY_DATABASE_URL = DATABASE_URL
+    print("Using DATABASE_URL from environment")
+elif all([DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME]):
+    # Manual PostgreSQL configuration
     SQLALCHEMY_DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-    print("Using PostgreSQL database")
+    print("Using PostgreSQL database with manual configuration")
 else:
-    # Fallback to local SQLite for development if Postgres env vars are not set
+    # Fallback to local SQLite for development
     project_root = Path(__file__).resolve().parent.parent
     sqlite_path = project_root / "app.db"
     SQLALCHEMY_DATABASE_URL = f"sqlite:///{sqlite_path.as_posix()}"
