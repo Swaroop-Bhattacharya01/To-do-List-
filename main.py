@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from datetime import timedelta
@@ -38,7 +39,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to the To-do List API", "docs": "/docs"}
+    return RedirectResponse(url="/docs")
 
 @app.post("/token", response_model=dict)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
